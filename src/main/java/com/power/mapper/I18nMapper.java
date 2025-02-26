@@ -9,5 +9,6 @@ public interface I18nMapper {
                             @Param("orgId") String orgId,
                             @Param("bizId") Long bizId,
                             @Param("type") Integer type,
-                            @Param("locale") String locale);
+                            @Param("locale") String locale,
+                            @Param("disabled") int disabled);
 }

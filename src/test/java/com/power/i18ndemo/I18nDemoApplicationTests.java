@@ -43,7 +43,7 @@ class I18nDemoApplicationTests {
     void test01() {
 //        International international = internationalMapper.selectById(1L);
 //        System.out.println(international);
-        String content = i18nMapper.queryItemContent(I18nTableEnums.INTERNATIONAL.getTableName(), "ORG_01", 1001L, 1, "en-US");
+        String content = i18nMapper.queryItemContent(I18nTableEnums.INTERNATIONAL.getTableName(), "ORG_01", 1001L, 1, "en-US", 0);
 
         System.out.println("==================================");
         System.out.println(content);

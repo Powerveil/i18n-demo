@@ -9,5 +9,8 @@
         select content
         from ${tableName}
         where org_id = #{orgId} and biz_id = #{bizId} and type = #{type} and locale = #{locale}
+        <if test="disabled != -1">
+            and disabled = #{disabled}
+        </if>
     </select>
 </mapper>

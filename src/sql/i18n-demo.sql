@@ -39,9 +39,9 @@ CREATE TABLE `business_base`  (
 -- ----------------------------
 -- Records of business_base
 -- ----------------------------
-INSERT INTO `business_base` VALUES (1, 'ORG_01', '电商系统', '面向消费者的在线购物平台', 0, '2025-02-26 01:01:56', '2025-02-26 01:01:56');
-INSERT INTO `business_base` VALUES (2, 'ORG_02', '财务系统', '企业级财务管理系统', 0, '2025-02-26 01:01:56', '2025-02-26 01:01:56');
-INSERT INTO `business_base` VALUES (3, 'ORG_01', '支付系统', '第三方支付接口服务', 0, '2025-02-26 01:01:56', '2025-02-26 01:01:56');
+INSERT INTO business_base (id, org_id, name, description, deleted, create_time, update_time) VALUES (1, 'ORG_01', '电商系统', '面向消费者的在线购物平台', 0, '2025-02-26 01:01:56', '2025-02-26 01:01:56');
+INSERT INTO business_base (id, org_id, name, description, deleted, create_time, update_time) VALUES (2, 'ORG_02', '财务系统', '企业级财务管理系统', 0, '2025-02-26 01:01:56', '2025-02-26 01:01:56');
+INSERT INTO business_base (id, org_id, name, description, deleted, create_time, update_time) VALUES (3, 'ORG_01', '支付系统', '第三方支付接口服务', 0, '2025-02-26 01:01:56', '2025-02-26 01:01:56');
 
 -- ----------------------------
 -- Table structure for international
@@ -63,11 +63,11 @@ CREATE TABLE `international`  (
 -- ----------------------------
 -- Records of international
 -- ----------------------------
-INSERT INTO `international` VALUES (1, 'ORG_00', 1000, 'Welcome message for organization 00 (Type:1)', 1, 0, '2025-02-26 00:47:42', '2025-02-26 00:47:42');
-INSERT INTO `international` VALUES (2, 'ORG_01', 1001, 'Error notification template (Type:3)', 3, 1, '2025-02-26 00:47:42', '2025-02-26 00:47:42');
-INSERT INTO `international` VALUES (3, 'ORG_02', 1002, 'User guide section 2.5 (Type:2)', 2, 0, '2025-02-26 00:47:42', '2025-02-26 00:47:42');
-INSERT INTO `international` VALUES (4, 'ORG_03', 1003, 'Password reset instructions (Type:4)', 4, 0, '2025-02-26 00:47:42', '2025-02-26 00:47:42');
-INSERT INTO `international` VALUES (5, 'ORG_04', 1004, 'Terms of service agreement (Type:5)', 5, 1, '2025-02-26 00:47:42', '2025-02-26 00:47:42');
-INSERT INTO `international` VALUES (6, 'ORG_49', 1049, 'Frequently asked question 42 (Type:2)', 2, 0, '2025-02-26 00:47:42', '2025-02-26 00:47:42');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (1, 'ORG_00', 1000, 'Welcome message for organization 00 (Type:1)', 1, 0, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 11:52:36');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (2, 'ORG_01', 1, 'english content 0001', 1, 1, 'en-US', '2025-02-26 00:47:42', '2025-02-26 16:17:31');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (3, 'ORG_01', 1, '中文内容1', 1, 0, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 16:17:31');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (4, 'ORG_01', 2, 'english content 00011213', 1, 0, 'en-US', '2025-02-26 00:47:42', '2025-02-26 16:17:31');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (5, 'ORG_04', 1004, '中文内容121', 1, 1, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 14:52:13');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (6, 'ORG_49', 1049, '中文内容121323232', 1, 0, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 14:52:13');
 
 SET FOREIGN_KEY_CHECKS = 1;
