@@ -66,8 +66,9 @@ CREATE TABLE `international`  (
 INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (1, 'ORG_00', 1000, 'Welcome message for organization 00 (Type:1)', 1, 0, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 11:52:36');
 INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (2, 'ORG_01', 1, 'english content 0001', 1, 1, 'en-US', '2025-02-26 00:47:42', '2025-02-26 16:17:31');
 INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (3, 'ORG_01', 1, '中文内容1', 1, 0, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 16:17:31');
-INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (4, 'ORG_01', 2, 'english content 00011213', 1, 0, 'en-US', '2025-02-26 00:47:42', '2025-02-26 16:17:31');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (4, 'ORG_01', 3, 'english content 00011213', 1, 0, 'en-US', '2025-02-26 00:47:42', '2025-02-26 17:53:03');
 INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (5, 'ORG_04', 1004, '中文内容121', 1, 1, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 14:52:13');
 INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (6, 'ORG_49', 1049, '中文内容121323232', 1, 0, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 14:52:13');
+INSERT INTO international (id, org_id, biz_id, content, type, disabled, locale, create_time, update_time) VALUES (7, 'ORG_01', 3, '中文内容12312', 1, 0, 'zh-CN', '2025-02-26 00:47:42', '2025-02-26 17:53:03');
 
 SET FOREIGN_KEY_CHECKS = 1;

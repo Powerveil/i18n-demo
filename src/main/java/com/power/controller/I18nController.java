@@ -4,6 +4,8 @@ package com.power.controller;
 import com.power.annotation.I18n;
 import com.power.domain.dto.I18Test1Dto;
 import com.power.domain.dto.I18Test2Dto;
+import com.power.domain.dto.I18Test3Dto;
+import com.power.domain.dto.I18Test4Dto;
 import com.power.domain.vo.Test1Vo;
 import com.power.manager.I18nManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,7 @@ import java.util.List;
  * @Version 1.0
  */
 @RestController
-@RequestMapping("/i18n")
+@RequestMapping("/i18n-test")
 public class I18nController {
 
 
@@ -48,6 +50,28 @@ public class I18nController {
     @I18n()
     public List<Test1Vo> test2(@RequestBody I18Test2Dto i18Test2Dto) {
         return i18nManager.test2(i18Test2Dto);
+    }
+
+    /**
+     * 测试单个不标准 多个、简单 国际化
+     * @param i18Test3Dto
+     * @return
+     */
+    @RequestMapping("/test3")
+    @I18n(orgIdField = "orgIddsadsa", localeField = "localdsadsae")
+    public Test1Vo test3(@RequestBody I18Test3Dto i18Test3Dto) {
+        return i18nManager.test3(i18Test3Dto);
+    }
+
+    /**
+     * 测试多个不标准 多个、简单 国际化
+     * @param i18Test4Dto
+     * @return
+     */
+    @RequestMapping("/test4")
+    @I18n(orgIdField = "orgIdIkun", localeField = "localeIkun")
+    public List<Test1Vo> test4(@RequestBody I18Test4Dto i18Test4Dto) {
+        return i18nManager.test4(i18Test4Dto);
     }
 
     @RequestMapping("/test")

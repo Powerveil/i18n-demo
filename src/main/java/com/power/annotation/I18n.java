@@ -1,15 +1,12 @@
 package com.power.annotation;
 
-import com.power.enums.I18nTableEnums;
-import com.power.enums.I18nTypeEnums;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD})
 public @interface I18n {
 
     /**
