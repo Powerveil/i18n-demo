@@ -2,6 +2,7 @@ package com.power.controller;
 
 
 import com.power.annotation.I18n;
+import com.power.common.Result;
 import com.power.domain.dto.I18Test1Dto;
 import com.power.domain.dto.I18Test2Dto;
 import com.power.domain.dto.I18Test3Dto;
@@ -73,6 +74,20 @@ public class I18nController {
     public List<Test1Vo> test4(@RequestBody I18Test4Dto i18Test4Dto) {
         return i18nManager.test4(i18Test4Dto);
     }
+
+
+    /**
+     * 测试多个不标准 多个、简单（适配自定义标准返回类） 国际化
+     * @param i18Test4Dto
+     * @return
+     */
+    @RequestMapping("/test5")
+    @I18n(orgIdField = "orgIdIkun", localeField = "localeIkun")
+    public Result<List<Test1Vo>> test5(@RequestBody I18Test4Dto i18Test4Dto) {
+        return Result.success(i18nManager.test4(i18Test4Dto));
+    }
+
+
 
     @RequestMapping("/test")
     public String test(){

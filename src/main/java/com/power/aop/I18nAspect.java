@@ -4,6 +4,7 @@ package com.power.aop;
 import cn.hutool.json.JSONUtil;
 import com.power.annotation.I18n;
 import com.power.annotation.PowerI18n;
+import com.power.common.Result;
 import com.power.mapper.I18nMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -110,6 +111,11 @@ public class I18nAspect {
 
     @SneakyThrows
     private void extractFieldValue(Object proceed, String orgId, String locale) {
+        // 可自定义标准返回类
+        if (proceed instanceof Result) {
+            proceed = ((Result<?>) proceed).getData();
+        }
+
         if (proceed instanceof Collection) {
             // todo 待优化
             ((Collection<?>) proceed).forEach(item -> this.extractFieldValue(item, orgId, locale));
