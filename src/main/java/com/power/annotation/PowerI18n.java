@@ -13,14 +13,28 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.FIELD})
 public @interface PowerI18n {
 
+    /**
+     * 表名
+     * @return
+     */
     I18nTableEnums tableName() default I18nTableEnums.INTERNATIONAL;
 
+    /**
+     * org_id对应对象中的字段名称
+     * @return
+     */
     String orgIdField() default "orgId";
 
+    /**
+     * 业务id对应对象中的字段名称
+     * @return
+     */
     String bizIdField() default "id";
 
-    String localeField() default "locale";
-
+    /**
+     * 国际化类型，一般一个业务表对应一个type
+     * @return
+     */
     I18nTypeEnums type();
 
     /**
@@ -28,7 +42,5 @@ public @interface PowerI18n {
      * @return
      */
     int status() default 0;
-
-    boolean enable() default true;
 
 }

@@ -45,6 +45,9 @@ public class International implements Serializable {
     @TableField(value = "type")
     private Integer type;
 
+    @TableField("locale")
+    private String locale;
+
     /**
      * 1：停用 0：启用
      */

@@ -28,11 +28,12 @@ public class I18nManager {
 
     public Test1Vo test1(I18Test1Dto i18Test1Dto) {
         LambdaQueryWrapper<BusinessBase> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(BusinessBase::getId, 1);
-        queryWrapper.eq(BusinessBase::getOrgId, "ORG_01");
+        queryWrapper.eq(BusinessBase::getId, i18Test1Dto.getId());
+        queryWrapper.eq(BusinessBase::getOrgId, i18Test1Dto.getOrgId());
         BusinessBase one = businessBaseService.getOne(queryWrapper);
 
         Test1Vo test1Vo = BeanUtil.copyProperties(one, Test1Vo.class);
+        test1Vo.setMyId(i18Test1Dto.getId());
 
         return test1Vo;
     }

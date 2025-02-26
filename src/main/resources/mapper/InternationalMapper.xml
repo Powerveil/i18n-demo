@@ -10,13 +10,21 @@
             <result property="bizId" column="biz_id" />
             <result property="content" column="content" />
             <result property="type" column="type" />
+            <result property="locale" column="locale" />
             <result property="disabled" column="disabled" />
             <result property="createTime" column="create_time" />
             <result property="updateTime" column="update_time" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,org_id,biz_id,content,type,disabled,
+        id,org_id,biz_id,content,`type`,locale,disabled,
         create_time,update_time
     </sql>
+    <select id="selectAllByLocale" resultType="java.lang.String">
+        select locale
+        from international
+        where org_id = #{orgId}
+        group by locale
+        ;
+    </select>
 </mapper>

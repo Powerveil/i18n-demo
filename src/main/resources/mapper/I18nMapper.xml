@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.power.mapper.I18nMapper">
+
+
+    <select id="queryItemContent" resultType="string">
+        select content
+        from ${tableName}
+        where org_id = #{orgId} and biz_id = #{bizId} and type = #{type} and locale = #{locale}
+    </select>
+</mapper>

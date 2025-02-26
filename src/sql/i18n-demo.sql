@@ -14,6 +14,10 @@
  Date: 26/02/2025 02:22:44
 */
 
+create database `i18n-demo`;
+
+use `i18n-demo`;
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
