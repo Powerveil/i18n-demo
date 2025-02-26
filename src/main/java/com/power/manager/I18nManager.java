@@ -2,12 +2,13 @@ package com.power.manager;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.power.domain.dto.I18Test1Dto;
+import com.power.domain.dto.I18Test2Dto;
 import com.power.domain.po.BusinessBase;
 import com.power.domain.vo.Test1Vo;
 import com.power.service.BusinessBaseService;
-import com.power.service.InternationalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,11 +31,29 @@ public class I18nManager {
         LambdaQueryWrapper<BusinessBase> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BusinessBase::getId, i18Test1Dto.getId());
         queryWrapper.eq(BusinessBase::getOrgId, i18Test1Dto.getOrgId());
-        BusinessBase one = businessBaseService.getOne(queryWrapper);
+        BusinessBase businessBase = businessBaseService.getOne(queryWrapper);
 
-        Test1Vo test1Vo = BeanUtil.copyProperties(one, Test1Vo.class);
+        Test1Vo test1Vo = BeanUtil.copyProperties(businessBase, Test1Vo.class);
         test1Vo.setMyId(i18Test1Dto.getId());
 
         return test1Vo;
+    }
+
+    public List<Test1Vo> test2(I18Test2Dto i18Test2Dto) {
+        LambdaQueryWrapper<BusinessBase> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(BusinessBase::getId, i18Test2Dto.getIdList());
+        queryWrapper.eq(BusinessBase::getOrgId, i18Test2Dto.getOrgId());
+        List<BusinessBase> businessBaseList = businessBaseService.list(queryWrapper);
+
+        List<Test1Vo> test1VoList = CollUtil.newArrayList();
+
+        for (BusinessBase businessBase : businessBaseList) {
+            Test1Vo test1Vo = BeanUtil.copyProperties(businessBase, Test1Vo.class);
+            test1Vo.setMyId(businessBase.getId());
+
+            test1VoList.add(test1Vo);
+        }
+
+        return test1VoList;
     }
 }

@@ -4,9 +4,8 @@ package com.power.aop;
 import cn.hutool.json.JSONUtil;
 import com.power.annotation.I18n;
 import com.power.annotation.PowerI18n;
-import com.power.enums.I18nTableEnums;
-import com.power.enums.I18nTypeEnums;
 import com.power.mapper.I18nMapper;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -15,12 +14,9 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,7 +103,20 @@ public class I18nAspect {
         String orgId = JSONUtil.parseObj(arg).getStr(methodI18n.orgIdField());;
         String locale = JSONUtil.parseObj(arg).getStr(methodI18n.localeField());
 
-        // todo 默认单个对象，非集合或嵌套
+        this.extractFieldValue(proceed, orgId, locale);
+
+        return proceed;
+    }
+
+    @SneakyThrows
+    private void extractFieldValue(Object proceed, String orgId, String locale) {
+        if (proceed instanceof Collection) {
+            // todo 待优化
+            ((Collection<?>) proceed).forEach(item -> this.extractFieldValue(item, orgId, locale));
+            return;
+        }
+
+        // todo 默认支持简单的 单个对象，集合(List)  暂不支持嵌套
         Class<?> clazz = proceed.getClass();
 
         // 获取所有字段(包括私有字段)
@@ -123,7 +132,6 @@ public class I18nAspect {
                 hasPowerI18nMap.put(field, powerI18n);
             }
         }
-
 
         for (Map.Entry<Field, PowerI18n> fieldPowerI18nEntry : hasPowerI18nMap.entrySet()) {
             Field field = fieldPowerI18nEntry.getKey();
@@ -141,8 +149,6 @@ public class I18nAspect {
             field.setAccessible(true);
             field.set(proceed, content);
         }
-
-        return proceed;
     }
 
     private I18n getMethodI18n(ProceedingJoinPoint joinPoint) {
