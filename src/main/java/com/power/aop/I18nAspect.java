@@ -1,6 +1,7 @@
 package com.power.aop;
 
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
 import com.power.annotation.I18n;
@@ -14,13 +15,12 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+//import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,6 +50,11 @@ public class I18nAspect {
      */
     private static final ConcurrentHashMap<Class<?>, Map<Field, PowerI18n>> powerI18nFieldsCache = new ConcurrentHashMap<>();
 
+
+//    final String SALT = "this is my salt";
+//    final int MIN_HASH_LENGTH = 6;
+//
+//    Hashids hashids = new Hashids(SALT, MIN_HASH_LENGTH);
 
     @Pointcut("@annotation(com.power.annotation.I18n)")
     public void pt() {
@@ -89,34 +94,19 @@ public class I18nAspect {
 
         if (proceed instanceof Collection) {
             // todo 待优化
-            ((Collection<?>) proceed).forEach(item -> this.extractFieldValue(item, orgId, locale));
+            this.extractBatchFieldValue((Collection<?>) proceed, orgId, locale);
             return;
         }
+        // todo Page -> proceed = (Page) proceed.getRecords()
 
         // todo 默认支持简单的 单个对象，集合(List)  暂不支持嵌套
-        Class<?> clazz = proceed.getClass();
-
-
-
         // 获取所有字段(包括私有字段)
-        Field[] fields = clazz.getDeclaredFields();
+        Class<?> clazz = proceed.getClass();
+        this.executeClassField(clazz);
 
-        Map<String, Field> fieldMap = classFieldCache.getOrDefault(clazz, new HashMap<>());
+        Map<String, Field> fieldMap = classFieldCache.getOrDefault(clazz, new LinkedHashMap<>());
 
-        Map<Field, PowerI18n> hasPowerI18nMap = powerI18nFieldsCache.getOrDefault(clazz, new HashMap<>());
-
-        if (MapUtil.isEmpty(fieldMap) || MapUtil.isEmpty(hasPowerI18nMap)) {
-            for (Field field : fields) {
-                fieldMap.put(field.getName(), field);
-                PowerI18n powerI18n = field.getAnnotation(PowerI18n.class);
-                if (powerI18n != null) {
-                    hasPowerI18nMap.put(field, powerI18n);
-                }
-            }
-            classFieldCache.put(clazz, fieldMap);
-            powerI18nFieldsCache.put(clazz, hasPowerI18nMap);
-        }
-
+        Map<Field, PowerI18n> hasPowerI18nMap = powerI18nFieldsCache.getOrDefault(clazz, new LinkedHashMap<>());
 
         for (Map.Entry<Field, PowerI18n> fieldPowerI18nEntry : hasPowerI18nMap.entrySet()) {
             Field field = fieldPowerI18nEntry.getKey();
@@ -136,6 +126,79 @@ public class I18nAspect {
         }
     }
 
+    @SneakyThrows
+    private void extractBatchFieldValue(Collection<?> proceedCollection, String orgId, String locale) {
+        if (CollUtil.isEmpty(proceedCollection)) {
+            return;
+        }
+        List<?> list = CollUtil.newArrayList(proceedCollection);
+        Class<?> clazz = list.get(0).getClass();
+        this.executeClassField(clazz);
+        Map<String, Field> fieldMap = classFieldCache.getOrDefault(clazz, new LinkedHashMap<>());
+
+        // 一个类有多个带这个注解的字段（todo 注意目前支持一层）
+        Map<Field, PowerI18n> hasPowerI18nMap = powerI18nFieldsCache.getOrDefault(clazz, new LinkedHashMap<>());
+
+        for (Map.Entry<Field, PowerI18n> fieldPowerI18nEntry : hasPowerI18nMap.entrySet()) {
+            Field field = fieldPowerI18nEntry.getKey();
+            PowerI18n powerI18n = fieldPowerI18nEntry.getValue();
+
+            // 现在获取了字段的信息，和一些注解里的死值  ====================================================================================================
+            String tableName = powerI18n.tableName().getTableName();
+            Integer type = powerI18n.type().getType();
+            int disabled = powerI18n.disabled();
+
+            Field bizIdFiled = fieldMap.get(powerI18n.bizIdField());
+            bizIdFiled.setAccessible(true);
+
+            // 获取变值
+            List<Long> bizIdList = CollUtil.newArrayList();
+
+            for (Object object : list) {
+                Long bizId = (Long) bizIdFiled.get(object);
+                bizIdList.add(bizId);
+            }
+            //
+            Map<String, String> map = i18nService.getContent(tableName, orgId, bizIdList, type, locale, disabled);
+
+            for (Object object : list) {
+                Long bizId = (Long) bizIdFiled.get(object);
+
+                String key = orgId + bizId + type + locale;
+                String content = map.get(key);
+
+                field.setAccessible(true);
+                field.set(object, content);
+            }
+        }
+
+    }
+
+
+    private void executeClassField(Class<?> clazz) {
+        // 获取所有字段(包括私有字段)
+
+        Map<String, Field> fieldMap = classFieldCache.getOrDefault(clazz, new LinkedHashMap<>());
+
+        Map<Field, PowerI18n> hasPowerI18nMap = powerI18nFieldsCache.getOrDefault(clazz, new LinkedHashMap<>());
+
+        if (MapUtil.isNotEmpty(fieldMap) && MapUtil.isNotEmpty(hasPowerI18nMap)) {
+            return;
+        }
+
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            fieldMap.put(field.getName(), field);
+            PowerI18n powerI18n = field.getAnnotation(PowerI18n.class);
+            if (powerI18n != null) {
+                field.setAccessible(true);
+                hasPowerI18nMap.put(field, powerI18n);
+            }
+        }
+        classFieldCache.put(clazz, fieldMap);
+        powerI18nFieldsCache.put(clazz, hasPowerI18nMap);
+    }
+
     private I18n getMethodI18n(ProceedingJoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         I18n annotation = methodSignature.getMethod().getAnnotation(I18n.class);
@@ -145,7 +208,6 @@ public class I18nAspect {
 
     //    @Around("pt()")
 //    public Object printLog(ProceedingJoinPoint joinPoint) throws Throwable {
-////        log.info("限流开始!");
 //        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 //        HttpServletRequest request = requestAttributes.getRequest();
 //
@@ -186,7 +248,6 @@ public class I18nAspect {
 //
 //
 
-    /// /        log.info("限流通过!");
 //        return proceed;
 //    }
 }

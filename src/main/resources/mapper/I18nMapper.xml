@@ -13,4 +13,16 @@
             and disabled = #{disabled}
         </if>
     </select>
+    <select id="queryItemListContent" resultType="string">
+        select CONCAT(org_id, biz_id, type, locale, #{split}, content)
+        from ${tableName}
+        where org_id = #{orgId}
+        <foreach collection="bizIdList" item="bizId" open="and biz_id in (" separator="," close=")">
+            #{bizId}
+        </foreach>
+        and type = #{type} and locale = #{locale}
+        <if test="disabled != -1">
+            and disabled = #{disabled}
+        </if>
+    </select>
 </mapper>
