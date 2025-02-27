@@ -10,6 +10,7 @@ import com.power.domain.dto.I18Test3Dto;
 import com.power.domain.dto.I18Test4Dto;
 import com.power.domain.po.BusinessBase;
 import com.power.domain.vo.Test1Vo;
+import com.power.domain.vo.Test2Vo;
 import com.power.service.BusinessBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -87,5 +88,23 @@ public class I18nManager {
         }
 
         return test1VoList;
+    }
+
+    public List<Test2Vo> test6(I18Test4Dto i18Test4Dto) {
+        LambdaQueryWrapper<BusinessBase> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(BusinessBase::getId, i18Test4Dto.getIdList());
+        queryWrapper.eq(BusinessBase::getOrgId, i18Test4Dto.getOrgIdIkun());
+        List<BusinessBase> businessBaseList = businessBaseService.list(queryWrapper);
+
+        List<Test2Vo> test2VoList = CollUtil.newArrayList();
+
+        for (BusinessBase businessBase : businessBaseList) {
+            Test2Vo test2Vo = BeanUtil.copyProperties(businessBase, Test2Vo.class);
+            test2Vo.setMyId(businessBase.getId());
+
+            test2VoList.add(test2Vo);
+        }
+
+        return test2VoList;
     }
 }
