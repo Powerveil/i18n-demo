@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Description todo 写在前面
  * 本质也就是去查表，无非是关系型数据库和非关系型数据库，把这个操作在方法返回时做出来
  * 是去数据库找到数据对应语言环境的
+ * 国际化处理切面类，用于处理带有@I18n注解的方法返回结果的字段国际化替换
  * @Author power
  * @Date 2025/2/26 1:23
  * @Version 1.0
@@ -63,10 +64,19 @@ public class I18nAspect {
 //
 //    Hashids hashids = new Hashids(SALT, MIN_HASH_LENGTH);
 
+    /**
+     * 定义切点，拦截所有被@I18n注解标记的方法
+     */
     @Pointcut("@annotation(com.power.annotation.I18n)")
     public void pt() {
     }
 
+    /**
+     * 环绕通知，处理国际化逻辑
+     * @param joinPoint 连接点对象，用于获取方法执行上下文
+     * @return 处理后的方法返回值
+     * @throws Throwable 可能抛出的异常
+     */
     @Around("pt()")
     public Object i18nHandleContent(ProceedingJoinPoint joinPoint) throws Throwable {
         Object proceed = joinPoint.proceed();
@@ -96,6 +106,13 @@ public class I18nAspect {
     }
 
 
+    /**
+     * 提取并设置单个对象的国际化字段值
+     * @param proceed 目标方法返回的对象
+     * @param orgId 组织ID
+     * @param locale 当前语言环境
+     * @param isFallback 是否启用回退逻辑
+     */
     @SneakyThrows
     private void extractFieldValue(Object proceed, String orgId, String locale, boolean isFallback) {
         // todo 这里如果解析错误，做解析适应自己项目的类就行
@@ -135,17 +152,22 @@ public class I18nAspect {
             Integer type = powerI18n.type().getType();
             int disabled = powerI18n.disabled();
 
-            Field biaIdFiled = fieldMap.get(powerI18n.bizIdField());
-            biaIdFiled.setAccessible(true);
-            Long bizId = (Long) biaIdFiled.get(proceed);
+            Field bizIdFiled = fieldMap.get(powerI18n.bizIdField());
+            Long bizId = (Long) bizIdFiled.get(proceed);
 
             Map<String, String> contentMap = i18nService.getContent(tableName, orgId, bizId, type, localeList, disabled);
             String content = this.getContentFallback(orgId, localeList, bizId, type, contentMap);
-            field.setAccessible(true);
             field.set(proceed, content);
         }
     }
 
+    /**
+     * 批量处理集合类型对象的国际化字段值
+     * @param proceedCollection 目标方法返回的对象集合
+     * @param orgId 组织ID
+     * @param locale 当前语言环境
+     * @param isFallback 是否启用回退逻辑
+     */
     @SneakyThrows
     private void extractBatchFieldValue(Collection<?> proceedCollection, String orgId, String locale, boolean isFallback) {
         if (CollUtil.isEmpty(proceedCollection)) {
@@ -175,7 +197,6 @@ public class I18nAspect {
             int disabled = powerI18n.disabled();
 
             Field bizIdFiled = fieldMap.get(powerI18n.bizIdField());
-            bizIdFiled.setAccessible(true);
 
             // 获取变值
             List<Long> bizIdList = CollUtil.newArrayList();
@@ -190,13 +211,21 @@ public class I18nAspect {
             for (Object object : list) {
                 Long bizId = (Long) bizIdFiled.get(object);
                 String content = this.getContentFallback(orgId, localeList, bizId, type, contentMap);
-                field.setAccessible(true);
                 field.set(object, content);
             }
         }
 
     }
 
+    /**
+     * 根据语言环境列表获取字段内容的回退值
+     * @param orgId 组织ID
+     * @param localeList 语言环境优先级列表
+     * @param bizId 业务ID
+     * @param type 国际化类型
+     * @param contentMap 国际化内容缓存
+     * @return 匹配到的国际化内容
+     */
     private String getContentFallback(String orgId, List<String> localeList, Long bizId, Integer type, Map<String, String> contentMap) {
         String content = null;
 
@@ -210,7 +239,10 @@ public class I18nAspect {
         return content;
     }
 
-
+    /**
+     * 解析并缓存类的字段信息（包含@PowerI18n注解处理）
+     * @param clazz 要处理的类类型
+     */
     private void executeClassField(Class<?> clazz) {
         // 获取所有字段(包括私有字段)
 
@@ -222,19 +254,34 @@ public class I18nAspect {
             return;
         }
 
+        List<String> bizIdFieldStrList = CollUtil.newArrayList();
+
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             fieldMap.put(field.getName(), field);
             PowerI18n powerI18n = field.getAnnotation(PowerI18n.class);
             if (powerI18n != null) {
+                // 破坏注解的字段的封装性
                 field.setAccessible(true);
                 hasPowerI18nMap.put(field, powerI18n);
+
+                bizIdFieldStrList.add(powerI18n.bizIdField());
             }
         }
+        // 破坏注解中 bizId 的字段的封装性
+        for (String bizIdFiledStr : bizIdFieldStrList) {
+            fieldMap.get(bizIdFiledStr).setAccessible(true);
+        }
+
         classFieldCache.put(clazz, fieldMap);
         powerI18nFieldsCache.put(clazz, hasPowerI18nMap);
     }
 
+    /**
+     * 获取方法上的@I18n注解实例
+     * @param joinPoint 连接点对象
+     * @return 方法上的I18n注解实例
+     */
     private I18n getMethodI18n(ProceedingJoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         I18n annotation = methodSignature.getMethod().getAnnotation(I18n.class);
