@@ -4,10 +4,9 @@ package com.power.manager;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.power.domain.dto.I18Test1Dto;
-import com.power.domain.dto.I18Test2Dto;
-import com.power.domain.dto.I18Test3Dto;
-import com.power.domain.dto.I18Test4Dto;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.power.common.MultiResult;
+import com.power.domain.dto.*;
 import com.power.domain.po.BusinessBase;
 import com.power.domain.vo.Test1Vo;
 import com.power.domain.vo.Test2Vo;
@@ -106,5 +105,33 @@ public class I18nManager {
         }
 
         return test2VoList;
+    }
+
+    public MultiResult<Test2Vo> test8(I18Test8Dto i18Test8Dto) {
+        int currentPage = i18Test8Dto.getCurrentPage();
+        int pageSize = i18Test8Dto.getPageSize();
+        Page<BusinessBase> page = new Page<>(currentPage, pageSize);
+
+        LambdaQueryWrapper<BusinessBase> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(BusinessBase::getId, i18Test8Dto.getIdList());
+        queryWrapper.eq(BusinessBase::getOrgId, i18Test8Dto.getOrgIdIkun());
+
+        Page<BusinessBase> userPage = businessBaseService.page(page, queryWrapper);
+
+        List<BusinessBase> businessBaseList = userPage.getRecords();
+
+
+        List<Test2Vo> test2VoList = CollUtil.newArrayList();
+
+        for (BusinessBase businessBase : businessBaseList) {
+            Test2Vo test2Vo = BeanUtil.copyProperties(businessBase, Test2Vo.class);
+            test2Vo.setMyId(businessBase.getId());
+
+            test2VoList.add(test2Vo);
+        }
+
+//        PageResponse.of(userPage.getRecords(), (int) userPage.getTotal(), pageSize, currentPage);
+
+        return MultiResult.successMulti(test2VoList, userPage.getTotal(), currentPage, pageSize);
     }
 }

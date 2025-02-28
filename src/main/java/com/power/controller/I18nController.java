@@ -2,11 +2,9 @@ package com.power.controller;
 
 
 import com.power.annotation.I18n;
+import com.power.common.MultiResult;
 import com.power.common.Result;
-import com.power.domain.dto.I18Test1Dto;
-import com.power.domain.dto.I18Test2Dto;
-import com.power.domain.dto.I18Test3Dto;
-import com.power.domain.dto.I18Test4Dto;
+import com.power.domain.dto.*;
 import com.power.domain.vo.Test1Vo;
 import com.power.domain.vo.Test2Vo;
 import com.power.enums.InterfaceTypeEnums;
@@ -109,6 +107,17 @@ public class I18nController {
     @I18n(interfaceType = InterfaceTypeEnums.INNER)
     public Test1Vo test7(@RequestBody I18Test1Dto i18Test1Dto) {
         return i18nManager.test1(i18Test1Dto);
+    }
+
+    /**
+     * 测试多个不标准 多个、简单（适配自定义标准返回类）分页查询 国际化
+     * @param i18Test8Dto
+     * @return
+     */
+    @RequestMapping("/test8")
+    @I18n(orgIdField = "orgIdIkun", localeField = "localeIkun")
+    public MultiResult<Test2Vo> test8(@RequestBody I18Test8Dto i18Test8Dto) {
+        return i18nManager.test8(i18Test8Dto);
     }
 
 
