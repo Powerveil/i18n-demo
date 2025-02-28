@@ -9,6 +9,7 @@ import com.power.domain.dto.I18Test3Dto;
 import com.power.domain.dto.I18Test4Dto;
 import com.power.domain.vo.Test1Vo;
 import com.power.domain.vo.Test2Vo;
+import com.power.enums.InterfaceTypeEnums;
 import com.power.manager.I18nManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -97,6 +98,17 @@ public class I18nController {
     @I18n(orgIdField = "orgIdIkun", localeField = "localeIkun")
     public Result<List<Test2Vo>> test6(@RequestBody I18Test4Dto i18Test4Dto) {
         return Result.success(i18nManager.test6(i18Test4Dto));
+    }
+
+    /**
+     * 单个、简单 国际化、兜底方案
+     * @param i18Test1Dto
+     * @return
+     */
+    @RequestMapping("/test7")
+    @I18n(interfaceType = InterfaceTypeEnums.INNER)
+    public Test1Vo test7(@RequestBody I18Test1Dto i18Test1Dto) {
+        return i18nManager.test1(i18Test1Dto);
     }
 
 

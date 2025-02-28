@@ -26,8 +26,23 @@ public class I18nServiceImpl implements I18nService {
 
     @Override
     public Map<String, String> getContent(String tableName, String orgId, List<Long> bizIdList, Integer type, String locale, int disabled) {
-        List<String> strings = i18nMapper.queryItemListContent(tableName, orgId, bizIdList, type, locale, disabled, split);
+        List<String> strings = i18nMapper.queryItemListContentByBizIdList(tableName, orgId, bizIdList, type, locale, disabled, split);
+        return this.getStringStringMap(strings);
+    }
 
+    @Override
+    public Map<String, String> getContent(String tableName, String orgId, Long bizId, Integer type, List<String> localeList, int disabled) {
+        List<String> strings = i18nMapper.queryItemListContentByLocaleList(tableName, orgId, bizId, type, localeList, disabled, split);
+        return this.getStringStringMap(strings);
+    }
+
+    @Override
+    public Map<String, String> getContent(String tableName, String orgId, List<Long> bizIdList, Integer type, List<String> localeList, int disabled) {
+        List<String> strings = i18nMapper.queryItemListContentByBizIdListAndLocaleList(tableName, orgId, bizIdList, type, localeList, disabled, split);
+        return this.getStringStringMap(strings);
+    }
+
+    private Map<String, String> getStringStringMap(List<String> strings) {
         Map<String, String> collect = strings.stream()
                 .collect(Collectors.toMap(item -> item.split(split)[0], item -> item.split(split)[1]));
         return collect;

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.power.mapper.OrganizationMapper">
+
+    <resultMap id="BaseResultMap" type="com.power.domain.po.Organization">
+            <id property="org_id" column="org_id" />
+            <result property="main_locale" column="main_locale" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        org_id,main_locale
+    </sql>
+    <select id="getMainLocaleByOrgId" resultType="java.lang.String">
+        select main_locale
+        from organization
+        where org_id = #{orgId}
+        ;
+    </select>
+</mapper>

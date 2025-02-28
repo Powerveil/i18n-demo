@@ -6,11 +6,10 @@ import com.power.mapper.I18nMapper;
 import com.power.mapper.InternationalMapper;
 import com.power.service.BusinessBaseService;
 import com.power.service.InternationalService;
+import com.power.service.OrganizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
 
 @SpringBootTest
 class I18nDemoApplicationTests {
@@ -23,6 +22,9 @@ class I18nDemoApplicationTests {
 
     @Autowired
     private InternationalMapper internationalMapper;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @Autowired
     private I18nMapper i18nMapper;
@@ -52,6 +54,15 @@ class I18nDemoApplicationTests {
 //        for (String s : zhCn) {
 //            System.out.println(s);
 //        }
+    }
+
+    /**
+     * 兜底语言测试
+     */
+    @Test
+    void test02() {
+        String mainLocale = organizationService.getMainLocaleByOrgId("ORG_01");
+        System.out.println(mainLocale);
     }
 
 }

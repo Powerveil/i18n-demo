@@ -1,5 +1,7 @@
 package com.power.annotation;
 
+import com.power.enums.InterfaceTypeEnums;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,4 +34,16 @@ public @interface I18n {
      * @return
      */
     boolean enable() default true;
+
+    /**
+     * 接口类型
+     * @return
+     */
+    InterfaceTypeEnums interfaceType() default InterfaceTypeEnums.OUTER;
+
+    /**
+     * 是否启用兜底策略（当找不到对应语言资源时，回退到默认语言）
+     * @return
+     */
+    boolean fallback() default false;
 }

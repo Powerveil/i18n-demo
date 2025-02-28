@@ -7,7 +7,10 @@ import cn.hutool.json.JSONUtil;
 import com.power.annotation.I18n;
 import com.power.annotation.PowerI18n;
 import com.power.common.Result;
+import com.power.enums.InterfaceTypeEnums;
 import com.power.service.I18nService;
+import com.power.service.OrganizationService;
+import com.power.utils.ListUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,6 +21,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 //import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -39,6 +43,9 @@ public class I18nAspect {
 
     @Autowired
     private I18nService i18nService;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     // 缓存类字段信息，避免重复反射
     /**
@@ -76,15 +83,21 @@ public class I18nAspect {
 
         String orgId = JSONUtil.parseObj(arg).getStr(methodI18n.orgIdField());
         String locale = JSONUtil.parseObj(arg).getStr(methodI18n.localeField());
+        boolean isFallback = false;
+        if (InterfaceTypeEnums.OUTER.equals(methodI18n.interfaceType())) {
+            isFallback = true;
+        } else if (InterfaceTypeEnums.INNER.equals(methodI18n.interfaceType())) {
+            isFallback = methodI18n.fallback();
+        }
 
-        this.extractFieldValue(proceed, orgId, locale);
+        this.extractFieldValue(proceed, orgId, locale, isFallback);
 
         return proceed;
     }
 
 
     @SneakyThrows
-    private void extractFieldValue(Object proceed, String orgId, String locale) {
+    private void extractFieldValue(Object proceed, String orgId, String locale, boolean isFallback) {
         // todo 这里如果解析错误，做解析适应自己项目的类就行
 
         // 可自定义标准返回类
@@ -93,8 +106,8 @@ public class I18nAspect {
         }
 
         if (proceed instanceof Collection) {
-            // todo 待优化
-            this.extractBatchFieldValue((Collection<?>) proceed, orgId, locale);
+            // todo 待优化 isFallback
+            this.extractBatchFieldValue((Collection<?>) proceed, orgId, locale, isFallback);
             return;
         }
         // todo Page -> proceed = (Page) proceed.getRecords()
@@ -108,6 +121,12 @@ public class I18nAspect {
 
         Map<Field, PowerI18n> hasPowerI18nMap = powerI18nFieldsCache.getOrDefault(clazz, new LinkedHashMap<>());
 
+        List<String> localeList = CollUtil.newArrayList(locale);
+        if (isFallback) {
+            localeList.add(organizationService.getMainLocaleByOrgId(orgId));
+            localeList = ListUtils.removeDuplicatesAndFilterNulls(localeList);
+        }
+
         for (Map.Entry<Field, PowerI18n> fieldPowerI18nEntry : hasPowerI18nMap.entrySet()) {
             Field field = fieldPowerI18nEntry.getKey();
             PowerI18n powerI18n = fieldPowerI18nEntry.getValue();
@@ -120,14 +139,15 @@ public class I18nAspect {
             biaIdFiled.setAccessible(true);
             Long bizId = (Long) biaIdFiled.get(proceed);
 
-            String content = i18nService.getContent(tableName, orgId, bizId, type, locale, disabled);
+            Map<String, String> contentMap = i18nService.getContent(tableName, orgId, bizId, type, localeList, disabled);
+            String content = this.getContentFallback(orgId, localeList, bizId, type, contentMap);
             field.setAccessible(true);
             field.set(proceed, content);
         }
     }
 
     @SneakyThrows
-    private void extractBatchFieldValue(Collection<?> proceedCollection, String orgId, String locale) {
+    private void extractBatchFieldValue(Collection<?> proceedCollection, String orgId, String locale, boolean isFallback) {
         if (CollUtil.isEmpty(proceedCollection)) {
             return;
         }
@@ -138,6 +158,12 @@ public class I18nAspect {
 
         // 一个类有多个带这个注解的字段（todo 注意目前支持一层）
         Map<Field, PowerI18n> hasPowerI18nMap = powerI18nFieldsCache.getOrDefault(clazz, new LinkedHashMap<>());
+
+        List<String> localeList = CollUtil.newArrayList(locale);
+        if (isFallback) {
+            localeList.add(organizationService.getMainLocaleByOrgId(orgId));
+            localeList = ListUtils.removeDuplicatesAndFilterNulls(localeList);
+        }
 
         for (Map.Entry<Field, PowerI18n> fieldPowerI18nEntry : hasPowerI18nMap.entrySet()) {
             Field field = fieldPowerI18nEntry.getKey();
@@ -159,19 +185,29 @@ public class I18nAspect {
                 bizIdList.add(bizId);
             }
             //
-            Map<String, String> map = i18nService.getContent(tableName, orgId, bizIdList, type, locale, disabled);
+            Map<String, String> contentMap = i18nService.getContent(tableName, orgId, bizIdList, type, localeList, disabled);
 
             for (Object object : list) {
                 Long bizId = (Long) bizIdFiled.get(object);
-
-                String key = orgId + bizId + type + locale;
-                String content = map.get(key);
-
+                String content = this.getContentFallback(orgId, localeList, bizId, type, contentMap);
                 field.setAccessible(true);
                 field.set(object, content);
             }
         }
 
+    }
+
+    private String getContentFallback(String orgId, List<String> localeList, Long bizId, Integer type, Map<String, String> contentMap) {
+        String content = null;
+
+        for (String localeItem : localeList) {
+            String key = orgId + bizId + type + localeItem;
+            content = contentMap.get(key);
+            if (content != null) {
+                break;
+            }
+        }
+        return content;
     }
 
 

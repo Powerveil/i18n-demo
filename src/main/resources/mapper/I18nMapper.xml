@@ -13,7 +13,7 @@
             and disabled = #{disabled}
         </if>
     </select>
-    <select id="queryItemListContent" resultType="string">
+    <select id="queryItemListContentByBizIdList" resultType="string">
         select CONCAT(org_id, biz_id, type, locale, #{split}, content)
         from ${tableName}
         where org_id = #{orgId}
@@ -21,6 +21,33 @@
             #{bizId}
         </foreach>
         and type = #{type} and locale = #{locale}
+        <if test="disabled != -1">
+            and disabled = #{disabled}
+        </if>
+    </select>
+    <select id="queryItemListContentByLocaleList" resultType="string">
+        select CONCAT(org_id, biz_id, type, locale, #{split}, content)
+        from ${tableName}
+        where org_id = #{orgId}
+        and biz_id = #{bizId} and type = #{type}
+        <foreach collection="localeList" item="locale" open="and locale in (" separator="," close=")">
+            #{locale}
+        </foreach>
+        <if test="disabled != -1">
+            and disabled = #{disabled}
+        </if>
+    </select>
+    <select id="queryItemListContentByBizIdListAndLocaleList" resultType="java.lang.String">
+        select CONCAT(org_id, biz_id, type, locale, #{split}, content)
+        from ${tableName}
+        where org_id = #{orgId}
+        <foreach collection="bizIdList" item="bizId" open="and biz_id in (" separator="," close=")">
+            #{bizId}
+        </foreach>
+        and type = #{type}
+        <foreach collection="localeList" item="locale" open="and locale in (" separator="," close=")">
+            #{locale}
+        </foreach>
         <if test="disabled != -1">
             and disabled = #{disabled}
         </if>
