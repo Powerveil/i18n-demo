@@ -14,6 +14,7 @@
 4. interfaceType（接口类型）
 5. fallback（是否启用兜底策略（当找不到对应语言资源时，回退到默认语言））
 
+
 1. tableName（表名）
 2. type（国际化类型，一般一个业务表对应一个type）
 3. bizIdField（业务id对应对象中的字段名称）
