@@ -8,6 +8,7 @@ public enum I18nTypeEnums {
      * 业务唯一标识
      */
     BUSINESS_BASE("business_base", 1),
+    BUSINESS_CAT("business_cat", 2),
     ;
 
     private String tableName;

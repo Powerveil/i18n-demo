@@ -5,6 +5,7 @@ import com.power.enums.I18nTableEnums;
 import com.power.mapper.I18nMapper;
 import com.power.mapper.InternationalMapper;
 import com.power.service.BusinessBaseService;
+import com.power.service.BusinessCatService;
 import com.power.service.InternationalService;
 import com.power.service.OrganizationService;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,9 @@ class I18nDemoApplicationTests {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private BusinessCatService businessCatService;
 
     @Autowired
     private I18nMapper i18nMapper;
@@ -63,6 +67,14 @@ class I18nDemoApplicationTests {
     void test02() {
         String mainLocale = organizationService.getMainLocaleByOrgId("ORG_01");
         System.out.println(mainLocale);
+    }
+
+    /**
+     *
+     */
+    @Test
+    void test03() {
+        System.out.println(businessCatService.list());
     }
 
 }
