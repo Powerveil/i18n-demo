@@ -5,15 +5,15 @@
 <mapper namespace="com.power.mapper.OrganizationMapper">
 
     <resultMap id="BaseResultMap" type="com.power.domain.po.Organization">
-            <id property="org_id" column="org_id" />
-            <result property="main_locale" column="main_locale" />
+            <id property="orgId" column="org_id" />
+            <result property="mainLocale" column="main_locale" />
     </resultMap>
 
     <sql id="Base_Column_List">
         org_id,main_locale
     </sql>
     <select id="getMainLocaleByOrgId" resultType="java.lang.String">
-        select main_locale
+        select main_locale as `mainLocale`
         from organization
         where org_id = #{orgId}
         ;

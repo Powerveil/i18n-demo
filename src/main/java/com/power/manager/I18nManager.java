@@ -8,9 +8,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.power.common.MultiResult;
 import com.power.domain.dto.*;
 import com.power.domain.po.BusinessBase;
-import com.power.domain.vo.Test1Vo;
-import com.power.domain.vo.Test2Vo;
+import com.power.domain.po.BusinessCat;
+import com.power.domain.vo.*;
 import com.power.service.BusinessBaseService;
+import com.power.service.BusinessCatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,9 @@ public class I18nManager {
 
     @Autowired
     private BusinessBaseService businessBaseService;
+
+    @Autowired
+    private BusinessCatService businessCatService;
 
     public Test1Vo test1(I18Test1Dto i18Test1Dto) {
         LambdaQueryWrapper<BusinessBase> queryWrapper = new LambdaQueryWrapper<>();
@@ -133,5 +137,31 @@ public class I18nManager {
 //        PageResponse.of(userPage.getRecords(), (int) userPage.getTotal(), pageSize, currentPage);
 
         return MultiResult.successMulti(test2VoList, userPage.getTotal(), currentPage, pageSize);
+    }
+
+    public Test3Vo test9(I18Test9Dto i18Test9Dto) {
+        String orgId = i18Test9Dto.getOrgIdIkun();
+        Long bbId = i18Test9Dto.getBbId();
+        Long bcId = i18Test9Dto.getBcId();
+
+        BusinessBase businessBase = businessBaseService.getOneById(orgId, bbId);
+        BusinessCat businessCat = businessCatService.getOneById(orgId, bcId);
+
+
+        BusinessBaseVo businessBaseVo = new BusinessBaseVo();
+        businessBaseVo.setBbId(bbId);
+        businessBaseVo.setDescription(businessBase.getDescription());
+
+        BusinessCatVo businessCatVo = new BusinessCatVo();
+        businessCatVo.setBcId(bcId);
+        businessCatVo.setDescription(businessCat.getDescription());
+
+
+        Test3Vo test3Vo = new Test3Vo();
+
+        test3Vo.setBusinessBaseVo(businessBaseVo);
+        test3Vo.setBusinessCatVo(businessCatVo);
+
+        return test3Vo;
     }
 }

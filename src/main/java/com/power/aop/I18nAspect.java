@@ -115,8 +115,11 @@ public class I18nAspect {
      */
     @SneakyThrows
     private void extractFieldValue(Object proceed, String orgId, String locale, boolean isFallback) {
-        // todo 这里如果解析错误，做解析适应自己项目的类就行
+        if (proceed == null) {
+            return;
+        }
 
+        // todo 这里如果解析错误，做解析适应自己项目的类就行
         // 可自定义标准返回类
         if (proceed instanceof Result) {
             proceed = ((Result<?>) proceed).getData();
@@ -127,7 +130,13 @@ public class I18nAspect {
             this.extractBatchFieldValue((Collection<?>) proceed, orgId, locale, isFallback);
             return;
         }
-        // todo Page -> proceed = (Page) proceed.getRecords()
+        // todo 先处理单个的对象的嵌套
+        // 如果是基本类型或JDK内置对象（如String），直接跳过
+        if (isJdkClass(proceed.getClass())) {
+            return;
+        }
+
+//        this.extractFieldValue(proceed, orgId, locale, isFallback);
 
         // todo 默认支持简单的 单个对象，集合(List)  暂不支持嵌套
         // 获取所有字段(包括私有字段)
@@ -135,10 +144,17 @@ public class I18nAspect {
         this.executeClassField(clazz);
 
         Map<String, Field> fieldMap = classFieldCache.getOrDefault(clazz, new LinkedHashMap<>());
+        for (Field value : fieldMap.values()) {
+            value.setAccessible(true);
+            this.extractFieldValue(value.get(proceed), orgId, locale, isFallback);
+        }
+
+
 
         Map<Field, PowerI18n> hasPowerI18nMap = powerI18nFieldsCache.getOrDefault(clazz, new LinkedHashMap<>());
 
         List<String> localeList = CollUtil.newArrayList(locale);
+        // 兜底
         if (isFallback) {
             localeList.add(organizationService.getMainLocaleByOrgId(orgId));
             localeList = ListUtils.removeDuplicatesAndFilterNulls(localeList);
@@ -286,6 +302,14 @@ public class I18nAspect {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         I18n annotation = methodSignature.getMethod().getAnnotation(I18n.class);
         return annotation;
+    }
+
+    /**
+     * 判断是否为JDK内置类（无需处理嵌套）
+     * todo 如果有自定义类加载器，可以在这里加逻辑
+     */
+    private boolean isJdkClass(Class<?> clazz) {
+        return clazz.getClassLoader() == null;
     }
 
 

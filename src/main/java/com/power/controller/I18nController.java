@@ -7,6 +7,7 @@ import com.power.common.Result;
 import com.power.domain.dto.*;
 import com.power.domain.vo.Test1Vo;
 import com.power.domain.vo.Test2Vo;
+import com.power.domain.vo.Test3Vo;
 import com.power.enums.InterfaceTypeEnums;
 import com.power.manager.I18nManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,17 @@ public class I18nController {
     @I18n(orgIdField = "orgIdIkun", localeField = "localeIkun")
     public MultiResult<Test2Vo> test8(@RequestBody I18Test8Dto i18Test8Dto) {
         return i18nManager.test8(i18Test8Dto);
+    }
+
+    /**
+     * 测试单个不标准 单个、简单（适配自定义标准返回类）分页查询 国际化 嵌套对象
+     * @param i18Test9Dto
+     * @return
+     */
+    @RequestMapping("/test9")
+    @I18n(orgIdField = "orgIdIkun", localeField = "localeIkun")
+    public Result<Test3Vo> test9(@RequestBody I18Test9Dto i18Test9Dto) {
+        return Result.success(i18nManager.test9(i18Test9Dto));
     }
 
 
